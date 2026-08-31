@@ -1,6 +1,7 @@
 package me.danjono.inventoryrollback.listeners;
 
 import com.nuclyon.technicallycoded.inventoryrollback.InventoryRollbackPlus;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import com.tcoded.lightlibs.bukkitversion.BukkitVersion;
 import me.danjono.inventoryrollback.config.ConfigData;
 import me.danjono.inventoryrollback.data.LogType;
@@ -93,12 +94,12 @@ public class EventLogs implements Listener {
 		// Run the cleanup 1 tick later in case the rate limiter should need to provide debug data.
 		// If the cleanup would run and the event is being spammed, this cleanup would delete the rate limiter's data
 		// before it has a chance to act.
-		main.getServer().getScheduler().runTaskLater(main, () -> {
-			// Double check that the player is offline
-			if (main.getServer().getPlayer(uuid) != null) return;
-			// Cleanup the player's data
-			SaveInventory.cleanup(uuid);
-		}, 1);
+        SchedulerUtil.runTaskLater(main, () -> {
+            // Double check that the player is offline
+            if (main.getServer().getPlayer(uuid) != null) return;
+            // Cleanup the player's data
+            SaveInventory.cleanup(uuid);
+        }, 1);
 	}
 
 	/**

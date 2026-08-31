@@ -1,6 +1,7 @@
 package me.danjono.inventoryrollback.inventory;
 
 import com.nuclyon.technicallycoded.inventoryrollback.InventoryRollbackPlus;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import com.nuclyon.technicallycoded.inventoryrollback.util.UserLogRateLimiter;
 import com.nuclyon.technicallycoded.inventoryrollback.util.serialization.ItemStackSerialization;
 import com.tcoded.lightlibs.bukkitversion.BukkitVersion;
@@ -98,7 +99,7 @@ public class SaveInventory {
             purgeTask.thenRun(() -> data.saveData(saveAsync));
         };
 
-        if (saveAsync) main.getServer().getScheduler().runTaskAsynchronously(main, saveTask);
+        if (saveAsync) SchedulerUtil.runTaskAsynchronously(main, saveTask);
         else saveTask.run();
 
     }

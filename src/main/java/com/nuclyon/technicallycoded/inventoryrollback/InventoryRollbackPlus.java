@@ -2,6 +2,7 @@ package com.nuclyon.technicallycoded.inventoryrollback;
 
 import com.nuclyon.technicallycoded.inventoryrollback.UpdateChecker.UpdateResult;
 import com.nuclyon.technicallycoded.inventoryrollback.commands.Commands;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import com.nuclyon.technicallycoded.inventoryrollback.util.TimeZoneUtil;
 import com.nuclyon.technicallycoded.inventoryrollback.util.test.SelfTestSerialization;
 import com.tcoded.lightlibs.bukkitversion.BukkitVersion;
@@ -16,7 +17,6 @@ import me.danjono.inventoryrollback.listeners.ClickGUI;
 import me.danjono.inventoryrollback.listeners.EventLogs;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
@@ -89,7 +89,7 @@ public class InventoryRollbackPlus extends InventoryRollback {
         getServer().getPluginManager().registerEvents(new ClickGUI(), this);
         getServer().getPluginManager().registerEvents(new EventLogs(), this);
         // Run after all plugin enable
-        getServer().getScheduler().runTask(this, EventLogs::patchLowestHandlers);
+        SchedulerUtil.runTask(this, EventLogs::patchLowestHandlers);
 
         // PaperLib
         if (!PaperLib.isPaper()) {
@@ -124,7 +124,7 @@ public class InventoryRollbackPlus extends InventoryRollback {
         HandlerList.unregisterAll(this);
 
         // Cancel tasks
-        this.getServer().getScheduler().cancelTasks(this);
+        SchedulerUtil.cancelTasks(this);
 
         // Clear instance references
         instancePlus = null;
@@ -149,9 +149,8 @@ public class InventoryRollbackPlus extends InventoryRollback {
     }
 
     public void checkUpdate() {
-        Bukkit.getScheduler().runTaskAsynchronously(InventoryRollback.getInstance(), () -> {
+        SchedulerUtil.runTaskAsynchronously(InventoryRollback.getInstance(), () -> {
             InventoryRollbackPlus.getInstance().getConsoleSender().sendMessage(MessageData.getPluginPrefix() + "Checking for updates...");
-
             final UpdateResult result = new UpdateChecker(getInstance(), 85811).getResult();
 
             int prioLevel = 0;

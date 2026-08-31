@@ -1,6 +1,7 @@
 package me.danjono.inventoryrollback.gui.menu;
 
 import com.nuclyon.technicallycoded.inventoryrollback.InventoryRollbackPlus;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import com.tcoded.lightlibs.bukkitversion.MCVersion;
 import me.danjono.inventoryrollback.config.ConfigData;
 import me.danjono.inventoryrollback.config.MessageData;
@@ -12,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -110,40 +110,36 @@ public class MainInventoryBackupMenu {
 		//If the backup file is invalid it will return null, we want to catch it here
 		try {
     		// Add items, 5 per tick
-			new BukkitRunnable() {
+			final boolean[] processedHotbar = {false};
+			final int[] menuPos = {27};
+			final int[] backupPos = {0};
+			final int max = Math.min(mainInvLen, 36); // excluded
 
-				boolean processedHotbar;
-				int menuPos = 27;
-				int backupPos = 0;
-				final int max = Math.min(mainInvLen, 36); // excluded
-
-				@Override
-				public void run() {
-					for (int i = 0; i < 6; i++) {
-						// If hit max item position, stop
-						if (backupPos >= max) {
-							this.cancel();
-							return;
-						}
-
-						ItemStack itemStack = mainInventory[backupPos];
-						if (itemStack != null) {
-							inventory.setItem(menuPos, itemStack);
-						}
-
-						// Move to next menu slot
-						menuPos++;
-						// We were incrementing the hotbar position (bottom of the UI) first. Once we reach that
-						// slot, we move back to the top of the UI for the rest of the inventory
-						if (menuPos >= 36 && !processedHotbar) {
-							menuPos = 0;
-						}
-
-						// Move to next item stack
-						backupPos++;
+			SchedulerUtil.runTaskTimer(main, (task) -> {
+				for (int i = 0; i < 6; i++) {
+					// If hit max item position, stop
+					if (backupPos[0] >= max) {
+						task.cancel();
+						return;
 					}
+
+					ItemStack itemStack = mainInventory[backupPos[0]];
+					if (itemStack != null) {
+						inventory.setItem(menuPos[0], itemStack);
+					}
+
+					// Move to next menu slot
+					menuPos[0]++;
+					// We were incrementing the hotbar position (bottom of the UI) first. Once we reach that
+					// slot, we move back to the top of the UI for the rest of the inventory
+					if (menuPos[0] >= 36 && !processedHotbar[0]) {
+						menuPos[0] = 0;
+					}
+
+					// Move to next item stack
+					backupPos[0]++;
 				}
-			}.runTaskTimer(main, 0, 1);
+			}, 0, 1);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getErrorInventory());
@@ -160,7 +156,7 @@ public class MainInventoryBackupMenu {
 					// Place item safely
 					final int finalPos = position;
 					final int finalItem = i;
-					Future<Void> placeItemFuture = main.getServer().getScheduler().callSyncMethod(main,
+					Future<Void> placeItemFuture = SchedulerUtil.callSyncMethod(main,
 							() -> {
 								inventory.setItem(finalPos, armor[finalItem]);
 								return null;
@@ -178,7 +174,7 @@ public class MainInventoryBackupMenu {
 						// Place item safely
 						final int finalPos = position;
 						final int finalItem = item;
-						Future<Void> placeItemFuture = main.getServer().getScheduler().callSyncMethod(main,
+						Future<Void> placeItemFuture = SchedulerUtil.callSyncMethod(main,
 								() -> {
 									inventory.setItem(finalPos, mainInventory[finalItem]);
 									return null;

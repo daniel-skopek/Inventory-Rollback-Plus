@@ -2,7 +2,7 @@ package com.nuclyon.technicallycoded.inventoryrollback.commands.inventoryrollbac
 
 import com.nuclyon.technicallycoded.inventoryrollback.InventoryRollbackPlus;
 import com.nuclyon.technicallycoded.inventoryrollback.commands.IRPCommand;
-import me.danjono.inventoryrollback.InventoryRollback;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import me.danjono.inventoryrollback.config.ConfigData;
 import me.danjono.inventoryrollback.config.MessageData;
 import me.danjono.inventoryrollback.gui.menu.MainMenu;
@@ -90,14 +90,14 @@ public class RestoreSubCmd extends IRPCommand {
         MainMenu menu = new MainMenu(staff, 1);
 
         staff.openInventory(menu.getInventory());
-        Bukkit.getScheduler().runTaskAsynchronously(InventoryRollback.getInstance(), menu::getMainMenu);
+        SchedulerUtil.runTaskAsynchronously(InventoryRollbackPlus.getInstance(), menu::getMainMenu);
     }
 
     private void openPlayerMenu(Player staff, OfflinePlayer offlinePlayer) {
         PlayerMenu menu = new PlayerMenu(staff, offlinePlayer);
 
         staff.openInventory(menu.getInventory());
-        Bukkit.getScheduler().runTaskAsynchronously(InventoryRollback.getInstance(), menu::getPlayerMenu);
+        SchedulerUtil.runTaskAsynchronously(InventoryRollbackPlus.getInstance(), menu::getPlayerMenu);
     }
 
 }

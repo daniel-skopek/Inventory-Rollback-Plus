@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.nuclyon.technicallycoded.inventoryrollback.InventoryRollbackPlus;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import me.danjono.inventoryrollback.InventoryRollback;
 import me.danjono.inventoryrollback.config.ConfigData;
 import me.danjono.inventoryrollback.config.ConfigData.SaveType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerData {
 
@@ -134,7 +134,7 @@ public class PlayerData {
         };
 
         InventoryRollbackPlus instance = InventoryRollbackPlus.getInstance();
-        if (saveAsync) instance.getServer().getScheduler().runTaskAsynchronously(instance, purgeTask);
+        if (saveAsync) SchedulerUtil.runTaskAsynchronously(instance, purgeTask);
         else purgeTask.run();
 
         return future;
@@ -263,17 +263,14 @@ public class PlayerData {
     public CompletableFuture<Void> getAllBackupData() {
         CompletableFuture<Void> future = new CompletableFuture<>();
         if (ConfigData.getSaveType() == SaveType.MYSQL) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    try {
-                        mysql.getAllBackupData();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    future.complete(null);
+            SchedulerUtil.runTaskAsynchronously(InventoryRollbackPlus.getInstance(), () -> {
+                try {
+                    mysql.getAllBackupData();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            }.runTaskAsynchronously(InventoryRollbackPlus.getInstance());
+                future.complete(null);
+            });
         }
         return future;
     }
@@ -437,7 +434,7 @@ public class PlayerData {
             }
         };
 
-        if (saveAsync) Bukkit.getScheduler().runTaskAsynchronously(InventoryRollback.getInstance(),saveDataTask);
+        if (saveAsync) SchedulerUtil.runTaskAsynchronously(InventoryRollback.getInstance(),saveDataTask);
         else saveDataTask.run();
     }
 

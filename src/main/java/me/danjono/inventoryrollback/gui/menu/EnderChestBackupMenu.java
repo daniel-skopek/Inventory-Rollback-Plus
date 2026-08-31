@@ -1,6 +1,7 @@
 package me.danjono.inventoryrollback.gui.menu;
 
 import com.nuclyon.technicallycoded.inventoryrollback.InventoryRollbackPlus;
+import com.nuclyon.technicallycoded.inventoryrollback.util.SchedulerUtil;
 import com.tcoded.lightlibs.bukkitversion.MCVersion;
 import me.danjono.inventoryrollback.config.ConfigData;
 import me.danjono.inventoryrollback.config.MessageData;
@@ -12,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,29 +90,25 @@ public class EnderChestBackupMenu {
         try {
 
             // Add items, 5 per tick
-            new BukkitRunnable() {
+            final int[] invPosition = {0};
+            final int[] itemPos = {(pageNumber - 1) * 27};
+            final int max = Math.max(0, itemPos[0] + Math.min(enderchest.length - itemPos[0], 27)); // excluded but starts from 0
 
-                int invPosition = 0;
-                int itemPos = (pageNumber - 1) * 27;
-                final int max = Math.max(0, itemPos + Math.min(enderchest.length - itemPos, 27)); // excluded but starts from 0
-
-                @Override
-                public void run() {
-                    for (int i = 0; i < 6; i++) {
-                        // If hit max item position, stop
-                        if (itemPos >= max) {
-                            this.cancel();
-                            return;
-                        }
-
-
-                        ItemStack itemStack = enderchest[itemPos];
-                        inventory.setItem(invPosition, itemStack); // setting null is fine (clears/keeps empty)
-                        invPosition++;
-                        itemPos++;
+            SchedulerUtil.runTaskTimer(InventoryRollbackPlus.getInstance(), (task) -> {
+                for (int i = 0; i < 6; i++) {
+                    // If hit max item position, stop
+                    if (itemPos[0] >= max) {
+                        task.cancel();
+                        return;
                     }
+
+
+                    ItemStack itemStack = enderchest[itemPos[0]];
+                    inventory.setItem(invPosition[0], itemStack); // setting null is fine (clears/keeps empty)
+                    invPosition[0]++;
+                    itemPos[0]++;
                 }
-            }.runTaskTimer(InventoryRollbackPlus.getInstance(), 0, 1);
+            }, 0, 1);
         } catch (NullPointerException e) {
             staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getErrorInventory());
             return;
